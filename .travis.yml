@@ -5,7 +5,7 @@ python:
 - '3.4'
 - pypy
 install:
-- pip install -qr dev-requirements.txt
+- pip install -qr test-requirements.txt
 script:
 - nosetests
 deploy:
