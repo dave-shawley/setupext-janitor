@@ -1,0 +1,20 @@
+language: python
+python:
+- '2.7'
+- '3.3'
+- '3.4'
+- pypy
+install:
+- pip install -qr dev-requirements.txt
+script:
+- nosetests
+deploy:
+  provider: pypi
+  user: daveshawley
+  password:
+    secure: GlAK7LyPin+goUjr1Vb6MJmI3duzihL3lyutfyZpmNz1BONbe3LZZB05FnoQLDPQGBVp0EpBnsgdsngtmumxBVbn5TJ8/oUNRUYfLOBrUyEFKurd8IDgfh1lJ+LtQvbZgie5hLG7DkHPr4gf0Gz4AIewrx9rypDc4Q8aerR2Suw=
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+    all_branches: true
+    python: 3.4

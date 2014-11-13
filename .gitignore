@@ -1,0 +1,11 @@
+build/
+dist/
+env/
+__pycache__/
+Gemfile
+Gemfile.lock
+
+.coverage
+*.pyc
+*.egg
+*.egg-info

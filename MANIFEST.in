@@ -1,0 +1,12 @@
+include HACKING
+include HISTORY
+include LICENSE
+include .coveragerc
+include *requirements.txt
+include tests.py
+include tox.ini
+graft docs
+
+global-exclude __pycache__
+global-exclude *.pyc
+global-exclude *.swp
