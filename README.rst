@@ -25,8 +25,50 @@ keeping targets such as *clean*, *dist-clean*, and *maintainer-clean*.
 This extension is inspired by the same desire for a clean working
 environment.
 
-Ok... Where?
-------------
+Installation
+~~~~~~~~~~~~
+The ``setuptools`` package contains a number of interesting ways in which
+it can be extended.  If you develop Python packages, then you can include
+extension packages using the ``setup_requires`` and ``cmdclass`` keyword
+parameters to the ``setup`` function call.  This is a little more
+difficult than it should be since the ``setupext`` package needs to be
+imported into *setup.py* so that it can be passed as a keyword parameter
+**before** it is downloaded.  The easiest way to do this is to catch the
+``ImportError`` that happens if it is not already downloaded::
+
+   import setuptools
+   try:
+      from setupext import janitor
+      CleanCommand = janitor.CleanCommand
+   except ImportError:
+      CleanCommand = None
+
+   cmd_classes = {}
+   if CleanCommand is not None:
+      cmd_classes['clean'] = CleanCommand
+
+   setup(
+      # normal parameters
+      setup_requires=['setupext.janitor'],
+      cmdclass=cmd_classes,
+   )
+
+You can use a different approach if you are simply a developer that wants
+to have this functionality available for your own use, then you can install
+it into your working environment.  This package installs itself into the
+environment as a `distutils extension`_ so that it is available to any
+*setup.py* script as if by magic.
+
+Usage
+~~~~~
+Once the extension is installed, the ``clean`` command will accept a
+few new command line parameters.
+
+``setup.py clean --dist``
+   Removes directories that the various *dist* commands produce.
+
+Where can I get this extension from?
+------------------------------------
 +---------------+-----------------------------------------------------+
 | Source        | https://github.com/dave-shawley/setupext-janitor    |
 +---------------+-----------------------------------------------------+
@@ -39,7 +81,10 @@ Ok... Where?
 | Issues        | https://github.com/dave-shawley/setupext-janitor    |
 +---------------+-----------------------------------------------------+
 
+.. _distutils extension: https://pythonhosted.org/setuptools/setuptools.html
+   #extending-and-reusing-setuptools
 .. _setuptools: https://pythonhosted.org/setuptools/
+
 .. |Version| image:: https://badge.fury.io/py/setupext-janitor.svg
    :target: https://badge.fury.io/
 .. |Downloads| image:: https://pypip.in/d/setupext-janitor/badge.svg?
@@ -48,4 +93,3 @@ Ok... Where?
    :target: https://travis-ci.org/dave-shawley/setupext-janitor
 .. |License| image:: https://pypip.in/license/dave-shawley/badge.svg?
    :target: https://setupext-dave-shawley.readthedocs.org/
-

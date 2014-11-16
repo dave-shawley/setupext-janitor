@@ -13,6 +13,8 @@ install_requirements = []
 test_requirements = ['nose>1.3,<2']
 if sys.version_info < (3, ):
     test_requirements.append('mock>1.0,<2')
+if sys.version_info < (2, 7):
+    test_requirements.append('unittest2')
 
 
 setuptools.setup(
@@ -39,6 +41,7 @@ setuptools.setup(
     ],
     entry_points={
         'distutils.commands': [
+            'clean = setupext.janitor:CleanCommand',
         ],
     },
 )
