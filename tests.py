@@ -81,13 +81,15 @@ class DirectoryCleanupTests(unittest.TestCase):
 
     @classmethod
     def create_directory(cls, dir_name):
-        full_path = os.path.join(cls.temp_dir, dir_name)
-        os.mkdir(full_path)
-        return full_path
+        return tempfile.mkdtemp(dir=cls.temp_dir, prefix=dir_name)
 
     def assert_path_does_not_exist(self, full_path):
         if os.path.exists(full_path):
             raise AssertionError('{0} should not exist'.format(full_path))
+
+    def assert_path_exists(self, full_path):
+        if not os.path.exists(full_path):
+            raise AssertionError('{0} should exist'.format(full_path))
 
     def test_that_dist_directory_is_removed_for_sdist(self):
         dist_dir = self.create_directory('dist-dir')
@@ -115,3 +117,14 @@ class DirectoryCleanupTests(unittest.TestCase):
         )
         self.assert_path_does_not_exist(sdist_dir)
         self.assert_path_does_not_exist(bdist_dir)
+
+    def test_that_directories_are_not_removed_without_parameter(self):
+        sdist_dir = self.create_directory('sdist-dir')
+        bdist_dir = self.create_directory('bdist_dumb')
+        run_setup(
+            'sdist', '--dist-dir={0}'.format(sdist_dir),
+            'bdist_dumb', '--dist-dir={0}'.format(bdist_dir),
+            'clean',
+        )
+        self.assert_path_exists(sdist_dir)
+        self.assert_path_exists(bdist_dir)

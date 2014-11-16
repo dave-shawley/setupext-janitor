@@ -46,6 +46,9 @@ class CleanCommand(_CleanCommand):
 
     def run(self):
         _CleanCommand.run(self)
+        if not self.dist:
+            return
+
         dist_dirs = set()
         for cmd_name in self.distribution.commands:
             if 'dist' in cmd_name:
