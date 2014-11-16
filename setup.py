@@ -41,6 +41,7 @@ setuptools.setup(
     ],
     entry_points={
         'distutils.commands': [
+            'clean = setupext.janitor:CleanCommand',
         ],
     },
 )

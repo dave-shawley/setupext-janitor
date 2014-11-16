@@ -1,4 +1,6 @@
+from distutils import log
 from distutils.command.clean import clean as _CleanCommand
+import shutil
 
 
 version_info = (0, 0, 0)
@@ -33,7 +35,28 @@ class CleanCommand(_CleanCommand):
     """
 
     # See _set_options for `user_options`
-    pass
+
+    def __init__(self, *args, **kwargs):
+        _CleanCommand.__init__(self, *args, **kwargs)
+        self.dist = None
+
+    def initialize_options(self):
+        _CleanCommand.initialize_options(self)
+        self.dist = False
+
+    def run(self):
+        _CleanCommand.run(self)
+        dist_dirs = set()
+        for cmd_name in self.distribution.commands:
+            if cmd_name == 'sdist':
+                command = self.distribution.get_command_obj(cmd_name)
+                command.ensure_finalized()
+                if getattr(command, 'dist_dir', None):
+                    dist_dirs.add(command.dist_dir)
+
+        for dir_name in dist_dirs:
+            self.announce('removing {0}'.format(dir_name), level=log.DEBUG)
+            shutil.rmtree(dir_name, ignore_errors=True)
 
 
 def _set_options():
@@ -56,5 +79,7 @@ def _set_options():
     CleanCommand.user_options.extend([
         ('dist', 'd', 'remove distribution directory'),
     ])
+    CleanCommand.boolean_options = _CleanCommand.boolean_options[:]
+    CleanCommand.boolean_options.append('dist')
 
 _set_options()
