@@ -48,7 +48,7 @@ class CleanCommand(_CleanCommand):
         _CleanCommand.run(self)
         dist_dirs = set()
         for cmd_name in self.distribution.commands:
-            if cmd_name == 'sdist':
+            if 'dist' in cmd_name:
                 command = self.distribution.get_command_obj(cmd_name)
                 command.ensure_finalized()
                 if getattr(command, 'dist_dir', None):

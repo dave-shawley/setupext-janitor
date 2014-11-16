@@ -96,3 +96,22 @@ class DirectoryCleanupTests(unittest.TestCase):
             'clean', '--dist',
         )
         self.assert_path_does_not_exist(dist_dir)
+
+    def test_that_dist_directory_is_removed_for_bdist_dumb(self):
+        dist_dir = self.create_directory('dist-dir')
+        run_setup(
+            'bdist_dumb', '--dist-dir={0}'.format(dist_dir),
+            'clean', '--dist',
+        )
+        self.assert_path_does_not_exist(dist_dir)
+
+    def test_that_multiple_dist_directories_with_be_removed(self):
+        sdist_dir = self.create_directory('sdist-dir')
+        bdist_dir = self.create_directory('bdist_dumb')
+        run_setup(
+            'sdist', '--dist-dir={0}'.format(sdist_dir),
+            'bdist_dumb', '--dist-dir={0}'.format(bdist_dir),
+            'clean', '--dist',
+        )
+        self.assert_path_does_not_exist(sdist_dir)
+        self.assert_path_does_not_exist(bdist_dir)
