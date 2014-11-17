@@ -5,6 +5,7 @@ import os.path
 import shutil
 import sys
 import tempfile
+import uuid
 
 if sys.version_info >= (2, 7):
     import unittest
@@ -71,12 +72,12 @@ class CommandOptionTests(unittest.TestCase):
             janitor.CleanCommand.user_options)
 
 
-class DirectoryCleanupTests(unittest.TestCase):
-    temp_dir = tempfile.mkdtemp()
+class DirectoryCleanupMixin(object):
 
     @classmethod
     def setUpClass(cls):
-        super(DirectoryCleanupTests, cls).setUpClass()
+        super(DirectoryCleanupMixin, cls).setUpClass()
+        cls.temp_dir = tempfile.mkdtemp()
         atexit.register(shutil.rmtree, cls.temp_dir)
 
     @classmethod
@@ -90,6 +91,9 @@ class DirectoryCleanupTests(unittest.TestCase):
     def assert_path_exists(self, full_path):
         if not os.path.exists(full_path):
             raise AssertionError('{0} should exist'.format(full_path))
+
+
+class DistDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
 
     def test_that_dist_directory_is_removed_for_sdist(self):
         dist_dir = self.create_directory('dist-dir')
@@ -136,3 +140,25 @@ class DirectoryCleanupTests(unittest.TestCase):
             'clean', '--dist', '--dry-run'
         )
         self.assert_path_exists(sdist_dir)
+
+
+class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
+
+    def test_that_egg_info_directories_are_removed(self):
+        egg_root = self.create_directory('egg-info-root')
+        os.mkdir(os.path.join(egg_root, 'bah.egg-info'))
+        os.mkdir(os.path.join(egg_root, 'foo.egg-info'))
+        run_setup('clean', '--egg-base={0}'.format(egg_root), '--eggs')
+        self.assert_path_exists(egg_root)
+        self.assert_path_does_not_exist(os.path.join(egg_root, 'bah.egg-info'))
+        self.assert_path_does_not_exist(os.path.join(egg_root, 'foo.egg-info'))
+
+    def test_that_egg_directories_are_removed(self):
+        dir_name = uuid.uuid4().hex + '.egg'
+        os.mkdir(dir_name)
+        try:
+            run_setup('clean', '--eggs')
+            self.assert_path_does_not_exist(dir_name)
+        except:
+            os.rmdir(dir_name)
+            raise

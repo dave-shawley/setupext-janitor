@@ -1,4 +1,4 @@
-from distutils import dir_util
+from distutils import dir_util, errors
 from distutils.command.clean import clean as _CleanCommand
 import os.path
 
@@ -36,30 +36,49 @@ class CleanCommand(_CleanCommand):
 
     # See _set_options for `user_options`
 
-    def __init__(self, *args, **kwargs):
-        _CleanCommand.__init__(self, *args, **kwargs)
-        self.dist = None
-
     def initialize_options(self):
         _CleanCommand.initialize_options(self)
         self.dist = False
+        self.eggs = False
+        self.egg_base = None
+
+    def finalize_options(self):
+        _CleanCommand.finalize_options(self)
+        try:
+            self.set_undefined_options(
+                'egg_info', ('egg_base', 'egg_base'))
+        except errors.DistutilsError:
+            pass
+
+        if self.egg_base is None:
+            self.egg_base = os.curdir
 
     def run(self):
         _CleanCommand.run(self)
-        if not self.dist:
-            return
 
-        dist_dirs = set()
-        for cmd_name, _ in self.distribution.get_command_list():
-            if 'dist' in cmd_name:
-                command = self.distribution.get_command_obj(cmd_name)
-                command.ensure_finalized()
-                if getattr(command, 'dist_dir', None):
-                    dist_dirs.add(command.dist_dir)
+        dir_names = set()
+        if self.dist:
+            for cmd_name, _ in self.distribution.get_command_list():
+                if 'dist' in cmd_name:
+                    command = self.distribution.get_command_obj(cmd_name)
+                    command.ensure_finalized()
+                    if getattr(command, 'dist_dir', None):
+                        dir_names.add(command.dist_dir)
 
-        for dir_name in dist_dirs:
+        if self.eggs:
+            for name in os.listdir(self.egg_base):
+                if name.endswith('.egg-info'):
+                    dir_names.add(os.path.join(self.egg_base, name))
+            for name in os.listdir(os.curdir):
+                if name.endswith('.egg'):
+                    dir_names.add(name)
+
+        for dir_name in dir_names:
             if os.path.exists(dir_name):
                 dir_util.remove_tree(dir_name, dry_run=self.dry_run)
+            else:
+                self.announce(
+                    'skipping {0} since it does not exist'.format(dir_name))
 
 
 def _set_options():
@@ -81,8 +100,13 @@ def _set_options():
     CleanCommand.user_options = _CleanCommand.user_options[:]
     CleanCommand.user_options.extend([
         ('dist', 'd', 'remove distribution directory'),
+        ('eggs', None, 'remove egg and egg-info directories'),
+
+        ('egg-base=', 'e',
+         'directory containing .egg-info directories '
+         '(default: top of the source tree)'),
     ])
     CleanCommand.boolean_options = _CleanCommand.boolean_options[:]
-    CleanCommand.boolean_options.append('dist')
+    CleanCommand.boolean_options.extend(['dist', 'eggs'])
 
 _set_options()

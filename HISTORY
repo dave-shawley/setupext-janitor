@@ -3,6 +3,7 @@ Changelog
 
 * Next Release
 
+  - Support removal of .egg-info and .egg directories.
   - Add support for *--dry-run*
 
 * 0.0.1 (16-Nov-2014)

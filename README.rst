@@ -67,6 +67,9 @@ few new command line parameters.
 ``setup.py clean --dist``
    Removes directories that the various *dist* commands produce.
 
+``setup.py clean --egg``
+   Removes *.egg* and *.egg-info* directories.
+
 Where can I get this extension from?
 ------------------------------------
 +---------------+-----------------------------------------------------+
