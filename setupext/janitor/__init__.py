@@ -50,7 +50,7 @@ class CleanCommand(_CleanCommand):
             return
 
         dist_dirs = set()
-        for cmd_name in self.distribution.commands:
+        for cmd_name, _ in self.distribution.get_command_list():
             if 'dist' in cmd_name:
                 command = self.distribution.get_command_obj(cmd_name)
                 command.ensure_finalized()
