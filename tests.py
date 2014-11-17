@@ -84,11 +84,13 @@ class DirectoryCleanupMixin(object):
     def create_directory(cls, dir_name):
         return tempfile.mkdtemp(dir=cls.temp_dir, prefix=dir_name)
 
-    def assert_path_does_not_exist(self, full_path):
+    def assert_path_does_not_exist(self, *trailing_segments):
+        full_path = os.path.join(*trailing_segments)
         if os.path.exists(full_path):
             raise AssertionError('{0} should not exist'.format(full_path))
 
-    def assert_path_exists(self, full_path):
+    def assert_path_exists(self, *trailing_segments):
+        full_path = os.path.join(*trailing_segments)
         if not os.path.exists(full_path):
             raise AssertionError('{0} should exist'.format(full_path))
 
@@ -150,8 +152,8 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         os.mkdir(os.path.join(egg_root, 'foo.egg-info'))
         run_setup('clean', '--egg-base={0}'.format(egg_root), '--eggs')
         self.assert_path_exists(egg_root)
-        self.assert_path_does_not_exist(os.path.join(egg_root, 'bah.egg-info'))
-        self.assert_path_does_not_exist(os.path.join(egg_root, 'foo.egg-info'))
+        self.assert_path_does_not_exist(egg_root, 'bah.egg-info')
+        self.assert_path_does_not_exist(egg_root, 'foo.egg-info')
 
     def test_that_egg_directories_are_removed(self):
         dir_name = uuid.uuid4().hex + '.egg'
@@ -174,7 +176,7 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
                 '--dry-run',
             )
             self.assert_path_exists(installed_egg)
-            self.assert_path_exists(os.path.join(egg_root, 'package.egg-info'))
+            self.assert_path_exists(egg_root, 'package.egg-info')
         except:
             os.rmdir(installed_egg)
             raise
