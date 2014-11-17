@@ -162,3 +162,20 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         except:
             os.rmdir(dir_name)
             raise
+
+    def test_that_directories_are_not_removed_in_dry_run_mode(self):
+        egg_root = self.create_directory('egg-info-root')
+        os.mkdir(os.path.join(egg_root, 'package.egg-info'))
+        installed_egg = uuid.uuid4().hex + '.egg'
+        os.mkdir(installed_egg)
+        try:
+            run_setup(
+                'clean', '--egg-base={0}'.format(egg_root), '--eggs',
+                '--dry-run',
+            )
+            self.assert_path_exists(installed_egg)
+            self.assert_path_exists(os.path.join(egg_root, 'package.egg-info'))
+        except:
+            os.rmdir(installed_egg)
+            raise
+        os.rmdir(installed_egg)
