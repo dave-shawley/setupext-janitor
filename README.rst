@@ -67,6 +67,9 @@ few new command line parameters.
 ``setup.py clean --dist``
    Removes directories that the various *dist* commands produce.
 
+``setup.py clean --egg``
+   Removes *.egg* and *.egg-info* directories.
+
 Where can I get this extension from?
 ------------------------------------
 +---------------+-----------------------------------------------------+
@@ -85,11 +88,11 @@ Where can I get this extension from?
    #extending-and-reusing-setuptools
 .. _setuptools: https://pythonhosted.org/setuptools/
 
-.. |Version| image:: https://badge.fury.io/py/setupext-janitor.svg
+.. |Version| image:: https://badge.fury.io/py/setupext-janitor.svg?
    :target: https://badge.fury.io/
 .. |Downloads| image:: https://pypip.in/d/setupext-janitor/badge.svg?
    :target: https://pypi.python.org/pypi/setupext-janitor
 .. |Status| image:: https://travis-ci.org/dave-shawley/setupext-janitor.svg
    :target: https://travis-ci.org/dave-shawley/setupext-janitor
-.. |License| image:: https://pypip.in/license/dave-shawley/badge.svg?
-   :target: https://setupext-dave-shawley.readthedocs.org/
+.. |License| image:: https://pypip.in/license/setupext-janitor/badge.svg?
+   :target: https://setupext-janitor.readthedocs.org/

@@ -44,4 +44,7 @@ setuptools.setup(
             'clean = setupext.janitor:CleanCommand',
         ],
     },
+    cmdclass={
+        'clean': janitor.CleanCommand,
+    },
 )
