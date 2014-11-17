@@ -1,6 +1,6 @@
-from distutils import log
+from distutils import dir_util
 from distutils.command.clean import clean as _CleanCommand
-import shutil
+import os.path
 
 
 version_info = (0, 0, 1)
@@ -58,8 +58,8 @@ class CleanCommand(_CleanCommand):
                     dist_dirs.add(command.dist_dir)
 
         for dir_name in dist_dirs:
-            self.announce('removing {0}'.format(dir_name), level=log.DEBUG)
-            shutil.rmtree(dir_name, ignore_errors=True)
+            if os.path.exists(dir_name):
+                dir_util.remove_tree(dir_name, dry_run=self.dry_run)
 
 
 def _set_options():

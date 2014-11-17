@@ -1,6 +1,10 @@
 Changelog
 =========
 
-* 0.0.1
+* Next Release
+
+  - Add support for *--dry-run*
+
+* 0.0.1 (16-Nov-2014)
 
   - Support removal of distribution directories.

@@ -128,3 +128,11 @@ class DirectoryCleanupTests(unittest.TestCase):
         )
         self.assert_path_exists(sdist_dir)
         self.assert_path_exists(bdist_dir)
+
+    def test_that_directories_are_not_removed_in_dry_run_mode(self):
+        sdist_dir = self.create_directory('sdist-dir')
+        run_setup(
+            'sdist', '--dist-dir={0}'.format(sdist_dir),
+            'clean', '--dist', '--dry-run'
+        )
+        self.assert_path_exists(sdist_dir)
