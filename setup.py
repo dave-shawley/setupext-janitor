@@ -37,7 +37,7 @@ setuptools.setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Framework :: Setuptools Plugin',
-        'Development Status :: 1 - Planning',
+        'Development Status :: 3 - Alpha',
     ],
     entry_points={
         'distutils.commands': [

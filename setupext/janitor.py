@@ -3,7 +3,7 @@ from distutils.command.clean import clean as _CleanCommand
 import os.path
 
 
-version_info = (0, 0, 2)
+version_info = (0, 0, 3)
 __version__ = '.'.join(str(v) for v in version_info)
 
 
@@ -41,6 +41,8 @@ class CleanCommand(_CleanCommand):
         self.dist = False
         self.eggs = False
         self.egg_base = None
+        self.environment = False
+        self.virtualenv_dir = None
 
     def finalize_options(self):
         _CleanCommand.finalize_options(self)
@@ -52,6 +54,9 @@ class CleanCommand(_CleanCommand):
 
         if self.egg_base is None:
             self.egg_base = os.curdir
+
+        if self.environment and self.virtualenv_dir is None:
+            self.virtualenv_dir = os.environ.get('VIRTUAL_ENV', None)
 
     def run(self):
         _CleanCommand.run(self)
@@ -72,6 +77,9 @@ class CleanCommand(_CleanCommand):
             for name in os.listdir(os.curdir):
                 if name.endswith('.egg'):
                     dir_names.add(name)
+
+        if self.environment and self.virtualenv_dir:
+            dir_names.add(self.virtualenv_dir)
 
         for dir_name in dir_names:
             if os.path.exists(dir_name):
@@ -101,12 +109,16 @@ def _set_options():
     CleanCommand.user_options.extend([
         ('dist', 'd', 'remove distribution directory'),
         ('eggs', None, 'remove egg and egg-info directories'),
+        ('environment', 'E', 'remove virtual environment directory'),
 
         ('egg-base=', 'e',
          'directory containing .egg-info directories '
          '(default: top of the source tree)'),
+        ('virtualenv-dir=', None,
+         'root directory for the virtual directory '
+         '(default: value of VIRTUAL_ENV environment variable)'),
     ])
     CleanCommand.boolean_options = _CleanCommand.boolean_options[:]
-    CleanCommand.boolean_options.extend(['dist', 'eggs'])
+    CleanCommand.boolean_options.extend(['dist', 'eggs', 'environment'])
 
 _set_options()

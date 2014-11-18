@@ -181,3 +181,38 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
             os.rmdir(installed_egg)
             raise
         os.rmdir(installed_egg)
+
+
+class VirtualEnvironmentCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
+    def setUp(self):
+        super(VirtualEnvironmentCleanupTests, self).setUp()
+        self._saved_venv = os.environ.get('VIRTUAL_ENV', None)
+
+    def tearDown(self):
+        super(VirtualEnvironmentCleanupTests, self).tearDown()
+        if self._saved_venv is not None:
+            os.environ['VIRTUAL_ENV'] = self._saved_venv
+        else:
+            os.environ.pop('VIRTUAL_ENV', None)
+
+    def test_that_virtualenv_is_removed_when_dir_is_specified(self):
+        venv_dir = self.create_directory('venv')
+        run_setup(
+            'clean', '--environment', '--virtualenv-dir={0}'.format(venv_dir))
+        self.assert_path_does_not_exist(venv_dir)
+
+    def test_that_virtualenv_is_removed_based_on_envvar(self):
+        venv_dir = self.create_directory('venv')
+        os.environ['VIRTUAL_ENV'] = venv_dir
+        run_setup('clean', '--environment')
+        self.assert_path_does_not_exist(venv_dir)
+
+    def test_that_janitor_does_not_fail_when_envdir_is_missing(self):
+        venv_dir = self.create_directory('venv')
+        os.environ['VIRTUAL_ENV'] = venv_dir
+        os.rmdir(venv_dir)
+        run_setup('clean', '--environment')
+
+    def test_that_janitor_does_not_fail_when_no_dir_specified(self):
+        os.environ.pop('VIRTUAL_ENV', None)
+        run_setup('clean', '--environment')
