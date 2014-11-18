@@ -70,6 +70,11 @@ few new command line parameters.
 ``setup.py clean --egg``
    Removes *.egg* and *.egg-info* directories.
 
+``setup.py clean --environment``
+   Removes the currently active virtual environment as indicated by the
+   ``$VIRTUAL_ENV`` environment variable.  The name of the directory can
+   also be specified using the ``--virtualenv-dir`` command line option.
+
 Where can I get this extension from?
 ------------------------------------
 +---------------+-----------------------------------------------------+
