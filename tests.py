@@ -184,6 +184,7 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
 
 
 class VirtualEnvironmentCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
+
     def setUp(self):
         super(VirtualEnvironmentCleanupTests, self).setUp()
         self._saved_venv = os.environ.get('VIRTUAL_ENV', None)
@@ -216,3 +217,41 @@ class VirtualEnvironmentCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
     def test_that_janitor_does_not_fail_when_no_dir_specified(self):
         os.environ.pop('VIRTUAL_ENV', None)
         run_setup('clean', '--environment')
+
+
+class PycacheCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
+
+    def setUp(self):
+        super(PycacheCleanupTests, self).setUp()
+        self.test_root = self.create_directory('test-root')
+        starting_dir = os.curdir
+        self.addCleanup(os.chdir, starting_dir)
+        os.chdir(self.test_root)
+
+    def mkdirs(self, *dirs):
+        for d in dirs:
+            os.makedirs(d)
+        return dirs[:]
+
+    def test_that_pycache_directories_are_removed(self):
+        all_dirs = self.mkdirs(
+            os.path.join(self.test_root, '__pycache__'),
+            os.path.join(self.test_root, 'a', '__pycache__'),
+            os.path.join(self.test_root, 'a', 'b', '__pycache__'),
+            os.path.join(self.test_root, 'b', '__pycache__'),
+        )
+
+        run_setup('clean', '--pycache')
+        for cache_dir in all_dirs:
+            self.assert_path_does_not_exist(cache_dir)
+
+    def test_that_janitor_does_not_fail_when_cache_parent_is_removed(self):
+        all_dirs = self.mkdirs(
+            os.path.join(self.test_root, 'dist'),
+            os.path.join(self.test_root, 'dist', '__pycache__', '__pycache__'),
+            os.path.join(self.test_root, 'dist', 'foo', '__pycache__'),
+        )
+
+        run_setup('clean', '--dist', '--pycache')
+        for cache_dir in all_dirs:
+            self.assert_path_does_not_exist(cache_dir)
