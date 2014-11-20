@@ -84,6 +84,12 @@ class DirectoryCleanupMixin(object):
     def create_directory(cls, dir_name):
         return tempfile.mkdtemp(dir=cls.temp_dir, prefix=dir_name)
 
+    @staticmethod
+    def mkdirs(*dirs):
+        for d in dirs:
+            os.makedirs(d)
+        return dirs[:]
+
     def assert_path_does_not_exist(self, *trailing_segments):
         full_path = os.path.join(*trailing_segments)
         if os.path.exists(full_path):
@@ -228,11 +234,6 @@ class PycacheCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         self.addCleanup(os.chdir, starting_dir)
         os.chdir(self.test_root)
 
-    def mkdirs(self, *dirs):
-        for d in dirs:
-            os.makedirs(d)
-        return dirs[:]
-
     def test_that_pycache_directories_are_removed(self):
         all_dirs = self.mkdirs(
             os.path.join(self.test_root, '__pycache__'),
@@ -255,3 +256,50 @@ class PycacheCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         run_setup('clean', '--dist', '--pycache')
         for cache_dir in all_dirs:
             self.assert_path_does_not_exist(cache_dir)
+
+
+class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(RemoveAllTests, cls).setUpClass()
+        test_root = cls.create_directory('test-root')
+        starting_dir = os.curdir
+        saved_env_dir = os.environ.get('VIRTUAL_ENV', None)
+
+        def restore():
+            os.chdir(starting_dir)
+            os.environ.pop('VIRTUAL_ENV', None)
+            if saved_env_dir is not None:
+                os.environ['VIRTUAL_ENV'] = saved_env_dir
+
+        os.chdir(test_root)
+        try:
+            all_dirs = cls.mkdirs(
+                '__pycache__',
+                'dist',
+                'foo.egg-info',
+                'env',
+            )
+            cls.pycache_dir = all_dirs[0]
+            cls.dist_dir = all_dirs[1]
+            cls.egg_dir = all_dirs[2]
+            cls.env_dir = all_dirs[3]
+            os.environ['VIRTUAL_ENV'] = cls.env_dir
+            run_setup('clean', '--all')
+            restore()
+        except:
+            restore()
+            raise
+
+    def test_that_pycache_is_removed(self):
+        self.assert_path_does_not_exist(self.pycache_dir)
+
+    def test_that_distdir_is_removed(self):
+        self.assert_path_does_not_exist(self.dist_dir)
+
+    def test_that_eggdir_is_removed(self):
+        self.assert_path_does_not_exist(self.egg_dir)
+
+    def test_that_envdir_is_removed(self):
+        self.assert_path_does_not_exist(self.env_dir)

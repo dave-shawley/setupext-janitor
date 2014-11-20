@@ -56,6 +56,10 @@ class CleanCommand(_CleanCommand):
         if self.egg_base is None:
             self.egg_base = os.curdir
 
+        if self.all:
+            for flag in self.boolean_options:
+                setattr(self, flag, True)
+
         if self.environment and self.virtualenv_dir is None:
             self.virtualenv_dir = os.environ.get('VIRTUAL_ENV', None)
 

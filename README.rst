@@ -78,6 +78,10 @@ few new command line parameters.
 ``setup.py clean --pycache``
    Recursively removes directories named *__pycache__*.
 
+``setup.py clean --all``
+   Remove all of by-products.  This is the same as using ``--dist --egg
+   --environment --pycache``.
+
 Where can I get this extension from?
 ------------------------------------
 +---------------+-----------------------------------------------------+
