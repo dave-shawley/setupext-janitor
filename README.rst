@@ -75,6 +75,13 @@ few new command line parameters.
    ``$VIRTUAL_ENV`` environment variable.  The name of the directory can
    also be specified using the ``--virtualenv-dir`` command line option.
 
+``setup.py clean --pycache``
+   Recursively removes directories named *__pycache__*.
+
+``setup.py clean --all``
+   Remove all of by-products.  This is the same as using ``--dist --egg
+   --environment --pycache``.
+
 Where can I get this extension from?
 ------------------------------------
 +---------------+-----------------------------------------------------+

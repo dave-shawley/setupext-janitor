@@ -42,6 +42,7 @@ class CleanCommand(_CleanCommand):
         self.eggs = False
         self.egg_base = None
         self.environment = False
+        self.pycache = False
         self.virtualenv_dir = None
 
     def finalize_options(self):
@@ -54,6 +55,10 @@ class CleanCommand(_CleanCommand):
 
         if self.egg_base is None:
             self.egg_base = os.curdir
+
+        if self.all:
+            for flag in self.boolean_options:
+                setattr(self, flag, True)
 
         if self.environment and self.virtualenv_dir is None:
             self.virtualenv_dir = os.environ.get('VIRTUAL_ENV', None)
@@ -80,6 +85,11 @@ class CleanCommand(_CleanCommand):
 
         if self.environment and self.virtualenv_dir:
             dir_names.add(self.virtualenv_dir)
+
+        if self.pycache:
+            for root, dirs, _ in os.walk(os.curdir):
+                if '__pycache__' in dirs:
+                    dir_names.add(os.path.join(root, '__pycache__'))
 
         for dir_name in dir_names:
             if os.path.exists(dir_name):
@@ -110,6 +120,7 @@ def _set_options():
         ('dist', 'd', 'remove distribution directory'),
         ('eggs', None, 'remove egg and egg-info directories'),
         ('environment', 'E', 'remove virtual environment directory'),
+        ('pycache', 'p', 'remove __pycache__ directories'),
 
         ('egg-base=', 'e',
          'directory containing .egg-info directories '
@@ -119,6 +130,7 @@ def _set_options():
          '(default: value of VIRTUAL_ENV environment variable)'),
     ])
     CleanCommand.boolean_options = _CleanCommand.boolean_options[:]
-    CleanCommand.boolean_options.extend(['dist', 'eggs', 'environment'])
+    CleanCommand.boolean_options.extend(
+        ['dist', 'eggs', 'environment', 'pycache'])
 
 _set_options()
