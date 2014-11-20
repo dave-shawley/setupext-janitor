@@ -3,7 +3,7 @@ from distutils.command.clean import clean as _CleanCommand
 import os.path
 
 
-version_info = (0, 0, 3)
+version_info = (1, 0, 0)
 __version__ = '.'.join(str(v) for v in version_info)
 
 
