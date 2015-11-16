@@ -3,7 +3,7 @@
 
 import sphinx_rtd_theme
 
-from setupext import janitor
+from setupext_janitor import janitor
 
 
 project = 'Setupext: janitor'

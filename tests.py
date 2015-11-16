@@ -12,7 +12,7 @@ if sys.version_info >= (2, 7):
 else:  # noinspection PyPackageRequirements,PyUnresolvedReferences
     import unittest2 as unittest
 
-from setupext import janitor
+from setupext_janitor import janitor
 
 
 def run_setup(*command_line):

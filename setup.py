@@ -3,7 +3,7 @@ import codecs
 import setuptools
 import sys
 
-from setupext import janitor
+from setupext_janitor import janitor
 
 
 with codecs.open('README.rst', 'rb', encoding='utf-8') as file_obj:
@@ -26,7 +26,6 @@ setuptools.setup(
     description='Making setup.py clean more useful.',
     long_description=long_description,
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
-    namespace_packages=['setupext'],
     zip_safe=True,
     platforms='any',
     install_requires=install_requirements,
@@ -41,7 +40,7 @@ setuptools.setup(
     ],
     entry_points={
         'distutils.commands': [
-            'clean = setupext.janitor:CleanCommand',
+            'clean = setupext_janitor.janitor:CleanCommand',
         ],
     },
     cmdclass={
