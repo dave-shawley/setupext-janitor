@@ -80,8 +80,9 @@ class CleanCommand(_CleanCommand):
                 if name.endswith('.egg-info'):
                     dir_names.add(os.path.join(self.egg_base, name))
             for name in os.listdir(os.curdir):
-                if name.endswith('.egg'):
-                    dir_names.add(name)
+                for e in ['.egg', '.eggs']:
+                    if name.endswith(e):
+                        dir_names.add(name)
 
         if self.environment and self.virtualenv_dir:
             dir_names.add(self.virtualenv_dir)
