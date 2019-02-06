@@ -67,7 +67,7 @@ few new command line parameters.
 ``setup.py clean --dist``
    Removes directories that the various *dist* commands produce.
 
-``setup.py clean --egg``
+``setup.py clean --eggs``
    Removes *.egg* and *.egg-info* directories.
 
 ``setup.py clean --environment``
