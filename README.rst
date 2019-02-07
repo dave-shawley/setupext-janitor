@@ -38,7 +38,7 @@ imported into *setup.py* so that it can be passed as a keyword parameter
 
    import setuptools
    try:
-      from setupext import janitor
+      from setupext_janitor import janitor
       CleanCommand = janitor.CleanCommand
    except ImportError:
       CleanCommand = None
@@ -49,8 +49,13 @@ imported into *setup.py* so that it can be passed as a keyword parameter
 
    setup(
       # normal parameters
-      setup_requires=['setupext.janitor'],
+      setup_requires=['setupext_janitor'],
       cmdclass=cmd_classes,
+      entry_points={
+         # normal parameters, ie. console_scripts[]
+         'distutils.commands': [
+            ' clean = setupext_janitor.janitor:CleanCommand']
+         }
    )
 
 You can use a different approach if you are simply a developer that wants
