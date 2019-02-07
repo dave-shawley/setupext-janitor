@@ -1,7 +1,7 @@
 from distutils import dir_util, errors
 from distutils.command.clean import clean as _CleanCommand
 import os.path
-
+import traceback
 
 version_info = (1, 0, 0)
 __version__ = '.'.join(str(v) for v in version_info)
@@ -75,12 +75,16 @@ class CleanCommand(_CleanCommand):
                     # mhw debug: this stops premature exit for RPM-on-NT err
                     # but means real fail will skipped too. Probably needs
                     # a better fix.
-                    #  
+                    # https://github.com/dave-shawley/setupext-janitor/issues/12
                     try:
                         command.ensure_finalized()
                     except Exception as e:
-                        print(f'\n*** Exception encountered and ignored:\n\t{command}\n\t{e}\n')
-
+                        print(f'\n*** Exception encountered and ignored:')
+                        print(e.__class__.__name__)
+                        print('-'*50)
+                        traceback.print_exc()
+                        print('-'*50,'\n')
+                        
                     if getattr(command, 'dist_dir', None):
                         dir_names.add(command.dist_dir)
                     
