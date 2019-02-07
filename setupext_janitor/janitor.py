@@ -80,7 +80,7 @@ class CleanCommand(_CleanCommand):
                         skip = "don't know how to create RPM distributions on platform nt"
                         if skip in err.args:
                             print('-'*50,'\nException encountered and ignored:')
-                            print(f'{err.__class__.__name__} {err.args[0]}')
+                            print('{} {}'.format(err.__class__.__name__, err.args[0]))
                             if debug: traceback.print_exc()
                             print('-'*50)
                         else:
