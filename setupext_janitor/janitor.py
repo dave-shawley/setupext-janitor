@@ -70,14 +70,17 @@ class CleanCommand(_CleanCommand):
         if self.dist:
             for cmd_name, _ in self.distribution.get_command_list():
                 if 'dist' in cmd_name:
-                    print('--- start of if dist in cmd_name --') #mhw
+                    #print('--- start of if dist in cmd_name --') #mhw
                     command = self.distribution.get_command_obj(cmd_name)
-                    print(command)
-                    command.ensure_finalized()
-                    print('passed command.ensure_finalized()') #mhw
+                    #print(command)
+                    try:
+                        command.ensure_finalized()
+                    except Exception as e:
+                        print(f'\n*** Exception encountered and ignored:\n\t{command}\n\t{e}\n')
+                    #print('passed command.ensure_finalized()') #mhw
                     if getattr(command, 'dist_dir', None):
                         dir_names.add(command.dist_dir)
-                    print('--- end of if dist in cmd_name --') #mhw
+                    #print('--- end of if dist in cmd_name --') #mhw
                     
         if self.eggs:
             for name in os.listdir(self.egg_base):
