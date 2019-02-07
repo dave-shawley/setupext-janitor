@@ -5,7 +5,7 @@ import traceback
 
 version_info = (1, 0, 0)
 __version__ = '.'.join(str(v) for v in version_info)
-
+debug = False
 
 class CleanCommand(_CleanCommand):
     """
@@ -71,19 +71,20 @@ class CleanCommand(_CleanCommand):
             for cmd_name, _ in self.distribution.get_command_list():
                 if 'dist' in cmd_name:
                     command = self.distribution.get_command_obj(cmd_name)
-                    
-                    # mhw debug: this stops premature exit for RPM-on-NT err
-                    # but means real fail will skipped too. Probably needs
-                    # a better fix.
+                    #command.ensure_finalized()
+                    # Stop premature exit for RPM-on-NT err
                     # https://github.com/dave-shawley/setupext-janitor/issues/12
                     try:
                         command.ensure_finalized()
-                    except Exception as e:
-                        print(f'\n*** Exception encountered and ignored:')
-                        print(e.__class__.__name__)
-                        print('-'*50)
-                        traceback.print_exc()
-                        print('-'*50,'\n')
+                    except Exception as err:
+                        skip = "don't know how to create RPM distributions on platform nt"
+                        if skip in err.args:
+                            print('-'*50,'\nException encountered and ignored:')
+                            print(f'{err.__class__.__name__} {err.args[0]}')
+                            if debug: traceback.print_exc()
+                            print('-'*50)
+                        else:
+                            raise err
                         
                     if getattr(command, 'dist_dir', None):
                         dir_names.add(command.dist_dir)
