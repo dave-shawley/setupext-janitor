@@ -171,6 +171,16 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
             os.rmdir(dir_name)
             raise
 
+    def test_that_eggs_directories_are_removed(self):
+        dir_name = uuid.uuid4().hex + '.eggs'
+        os.mkdir(dir_name)
+        try:
+            run_setup('clean', '--eggs')
+            self.assert_path_does_not_exist(dir_name)
+        except:
+            os.rmdir(dir_name)
+            raise
+
     def test_that_directories_are_not_removed_in_dry_run_mode(self):
         egg_root = self.create_directory('egg-info-root')
         os.mkdir(os.path.join(egg_root, 'package.egg-info'))
