@@ -7,12 +7,12 @@ import sys
 import tempfile
 import uuid
 
+from setupext_janitor import janitor
+
 if sys.version_info >= (2, 7):
     import unittest
 else:  # noinspection PyPackageRequirements,PyUnresolvedReferences
     import unittest2 as unittest
-
-from setupext_janitor import janitor
 
 
 def run_setup(*command_line):
@@ -167,7 +167,7 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         try:
             run_setup('clean', '--eggs')
             self.assert_path_does_not_exist(dir_name)
-        except:
+        except Exception:
             os.rmdir(dir_name)
             raise
 
@@ -177,7 +177,7 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         try:
             run_setup('clean', '--eggs')
             self.assert_path_does_not_exist(dir_name)
-        except:
+        except Exception:
             os.rmdir(dir_name)
             raise
 
@@ -193,7 +193,7 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
             )
             self.assert_path_exists(installed_egg)
             self.assert_path_exists(egg_root, 'package.egg-info')
-        except:
+        except Exception:
             os.rmdir(installed_egg)
             raise
         os.rmdir(installed_egg)
@@ -298,7 +298,7 @@ class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):
             os.environ['VIRTUAL_ENV'] = cls.env_dir
             run_setup('clean', '--all')
             restore()
-        except:
+        except Exception:
             restore()
             raise
 
