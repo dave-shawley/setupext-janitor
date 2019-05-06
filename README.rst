@@ -107,9 +107,9 @@ Where can I get this extension from?
 
 .. |Version| image:: https://badge.fury.io/py/setupext-janitor.svg?
    :target: https://badge.fury.io/
-.. |Downloads| image:: https://pypip.in/d/setupext-janitor/badge.svg?
+.. |Downloads| image:: https://img.shields.io/pypi/dm/setupext-janitor.svg
    :target: https://pypi.python.org/pypi/setupext-janitor
 .. |Status| image:: https://travis-ci.org/dave-shawley/setupext-janitor.svg
    :target: https://travis-ci.org/dave-shawley/setupext-janitor
-.. |License| image:: https://pypip.in/license/setupext-janitor/badge.svg?
+.. |License| image:: https://img.shields.io/pypi/l/setupext-janitor.svg
    :target: https://setupext-janitor.readthedocs.org/
