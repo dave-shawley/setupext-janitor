@@ -1,6 +1,15 @@
 Changelog
 =========
 
+* Next Release
+
+  - Move `version` and `version_info` from the `janitor` module into the
+    top-level package.  Also renamed `__version__` to `version`
+  - Remove namespace packaging (thanks @ionelmc)
+  - Fix distribution cleanup on Windows (thanks @maphew)
+  - Clean up *.eggs* as well as *.egg* (thanks @maphew)
+  - Switch from pypip.in to shields.io (thanks @movermeyer)
+
 * 1.0.0 (19-Nov-2014)
 
   - Support removal of virtual environment directories.
