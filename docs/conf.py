@@ -7,7 +7,7 @@ from setupext_janitor import janitor
 
 
 project = 'Setupext: janitor'
-copyright = '2014, Dave Shawley'
+copyright = '2014-2019, Dave Shawley'
 version = janitor.__version__
 release = janitor.__version__
 
