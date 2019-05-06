@@ -3,8 +3,12 @@ from distutils.command.clean import clean as _CleanCommand
 import os.path
 import traceback
 
-version_info = (1, 0, 1)
-__version__ = '.'.join(str(v) for v in version_info)
+import setupext_janitor
+
+# backwards compat -- WILL BE REMOVED IN THE FUTURE
+version_info = setupext_janitor.version_info
+__version__ = setupext_janitor.version
+
 debug = False
 
 class CleanCommand(_CleanCommand):
@@ -85,10 +89,10 @@ class CleanCommand(_CleanCommand):
                             print('-'*50)
                         else:
                             raise err
-                        
+
                     if getattr(command, 'dist_dir', None):
                         dir_names.add(command.dist_dir)
-                    
+
         if self.eggs:
             for name in os.listdir(self.egg_base):
                 if name.endswith('.egg-info'):

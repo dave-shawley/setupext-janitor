@@ -3,7 +3,7 @@ import codecs
 import setuptools
 import sys
 
-from setupext_janitor import janitor
+import setupext_janitor.janitor
 
 
 with codecs.open('README.rst', 'rb', encoding='utf-8') as file_obj:
@@ -19,7 +19,7 @@ if sys.version_info < (2, 7):
 
 setuptools.setup(
     name='setupext-janitor',
-    version=janitor.__version__,
+    version=setupext_janitor.version,
     author='Dave Shawley',
     author_email='daveshawley@gmail.com',
     url='http://github.com/dave-shawley/setupext-janitor',
@@ -44,6 +44,6 @@ setuptools.setup(
         ],
     },
     cmdclass={
-        'clean': janitor.CleanCommand,
+        'clean': setupext_janitor.janitor.CleanCommand,
     },
 )
