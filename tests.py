@@ -3,16 +3,11 @@ from distutils.command import clean
 import atexit
 import os.path
 import shutil
-import sys
 import tempfile
+import unittest
 import uuid
 
 from setupext_janitor import janitor
-
-if sys.version_info >= (2, 7):
-    import unittest
-else:  # noinspection PyPackageRequirements,PyUnresolvedReferences
-    import unittest2 as unittest
 
 
 def run_setup(*command_line):
