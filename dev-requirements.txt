@@ -1,6 +1,0 @@
--r test-requirements.txt
-detox>=0.9,<1
-flake8>=2.2,<3
-pyflakes>=0.8,<1
-sphinx>=1.2,<2
-sphinx-rtd-theme>=0.1,<1

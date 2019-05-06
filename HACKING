@@ -2,8 +2,8 @@ Setting up your environment
 ---------------------------
 
 The easiest way to start working with this code is to set up a virtual
-environment and run ``env/bin/pip install -qr dev-requirements.txt``.
-That will install the necessary testing tools.  Then you can run everything
+environment and run ``env/bin/pip install -q '.[dev]'``.  That will install
+the necessary testing and development tools.  Then you can run everything
 else using ``env/bin/python setup.py``:
 
 - *setup.py nosetest* will run the tests using nose to test against the

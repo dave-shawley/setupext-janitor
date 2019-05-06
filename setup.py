@@ -1,16 +1,7 @@
 #!/usr/bin/env python
-import sys
-
 import setuptools
 
 import setupext_janitor.janitor
-
-
-install_requirements = []
-test_requirements = ['nose>1.3,<2']
-if sys.version_info < (3, ):
-    test_requirements.append('mock>1.0,<2')
-
 
 setuptools.setup(
     name='setupext-janitor',
@@ -23,8 +14,6 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
     platforms='any',
-    install_requires=install_requirements,
-    tests_require=test_requirements,
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
@@ -43,5 +32,15 @@ setuptools.setup(
     },
     cmdclass={
         'clean': setupext_janitor.janitor.CleanCommand,
+    },
+    extras_require={
+        'dev': [
+            'coverage==4.5.3',
+            'flake8==3.7.7',
+            'nose==1.3.7',
+            'sphinx==1.8.5',
+            'sphinx-rtd-theme==0.4.3',
+            'tox==3.9.0',
+        ],
     },
 )
