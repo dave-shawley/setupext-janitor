@@ -1,11 +1,11 @@
 from distutils import dir_util, errors
 from distutils.command.clean import clean as _CleanCommand
 import os.path
+import traceback
 
-
-version_info = (1, 0, 0)
+version_info = (1, 0, 1)
 __version__ = '.'.join(str(v) for v in version_info)
-
+debug = False
 
 class CleanCommand(_CleanCommand):
     """
@@ -71,17 +71,32 @@ class CleanCommand(_CleanCommand):
             for cmd_name, _ in self.distribution.get_command_list():
                 if 'dist' in cmd_name:
                     command = self.distribution.get_command_obj(cmd_name)
-                    command.ensure_finalized()
+                    #command.ensure_finalized()
+                    # Stop premature exit for RPM-on-NT err
+                    # https://github.com/dave-shawley/setupext-janitor/issues/12
+                    try:
+                        command.ensure_finalized()
+                    except Exception as err:
+                        skip = "don't know how to create RPM distributions on platform nt"
+                        if skip in err.args:
+                            print('-'*50,'\nException encountered and ignored:')
+                            print('{} {}'.format(err.__class__.__name__, err.args[0]))
+                            if debug: traceback.print_exc()
+                            print('-'*50)
+                        else:
+                            raise err
+                        
                     if getattr(command, 'dist_dir', None):
                         dir_names.add(command.dist_dir)
-
+                    
         if self.eggs:
             for name in os.listdir(self.egg_base):
                 if name.endswith('.egg-info'):
                     dir_names.add(os.path.join(self.egg_base, name))
             for name in os.listdir(os.curdir):
-                if name.endswith('.egg'):
-                    dir_names.add(name)
+                for e in ['.egg', '.eggs']:
+                    if name.endswith(e):
+                        dir_names.add(name)
 
         if self.environment and self.virtualenv_dir:
             dir_names.add(self.virtualenv_dir)

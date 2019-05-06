@@ -12,7 +12,7 @@ if sys.version_info >= (2, 7):
 else:  # noinspection PyPackageRequirements,PyUnresolvedReferences
     import unittest2 as unittest
 
-from setupext import janitor
+from setupext_janitor import janitor
 
 
 def run_setup(*command_line):
@@ -163,6 +163,16 @@ class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
 
     def test_that_egg_directories_are_removed(self):
         dir_name = uuid.uuid4().hex + '.egg'
+        os.mkdir(dir_name)
+        try:
+            run_setup('clean', '--eggs')
+            self.assert_path_does_not_exist(dir_name)
+        except:
+            os.rmdir(dir_name)
+            raise
+
+    def test_that_eggs_directories_are_removed(self):
+        dir_name = uuid.uuid4().hex + '.eggs'
         os.mkdir(dir_name)
         try:
             run_setup('clean', '--eggs')
