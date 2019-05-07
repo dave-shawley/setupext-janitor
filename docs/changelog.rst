@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* 1.1.1 (07-May-2019)
+
+  - Fix ``Requires-Python`` metadata.
+
 * 1.1.0 (07-May-2019)
 
   - Drop support for Python 2.6, and 3.0-3.4
