@@ -3,13 +3,13 @@
 
 import sphinx_rtd_theme
 
-from setupext_janitor import janitor
+import setupext_janitor
 
 
 project = 'Setupext: janitor'
-copyright = '2014, Dave Shawley'
-version = janitor.__version__
-release = janitor.__version__
+copyright = '2014-2019, Dave Shawley'
+version = setupext_janitor.version
+release = setupext_janitor.version
 
 needs_sphinx = '1.0'
 extensions = [

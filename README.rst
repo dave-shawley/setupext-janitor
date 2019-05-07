@@ -94,22 +94,22 @@ Where can I get this extension from?
 +---------------+-----------------------------------------------------+
 | Status        | https://travis-ci.org/dave-shawley/setupext-janitor |
 +---------------+-----------------------------------------------------+
-| Download      | https://pypi.python.org/pypi/setupext-janitor       |
+| Download      | https://pypi.org/project/setupext-janitor           |
 +---------------+-----------------------------------------------------+
-| Documentation | http://setupext-janitor.readthedocs.org/en/latest   |
+| Documentation | http://setupext-janitor.readthedocs.io/en/latest    |
 +---------------+-----------------------------------------------------+
 | Issues        | https://github.com/dave-shawley/setupext-janitor    |
 +---------------+-----------------------------------------------------+
 
-.. _distutils extension: https://pythonhosted.org/setuptools/setuptools.html
-   #extending-and-reusing-setuptools
-.. _setuptools: https://pythonhosted.org/setuptools/
+.. _distutils extension: https://setuptools.readthedocs.io/en/latest
+   /setuptools.html#extending-and-reusing-setuptools
+.. _setuptools: https://setuptools.readthedocs.io/en/latest/
 
-.. |Version| image:: https://badge.fury.io/py/setupext-janitor.svg?
-   :target: https://badge.fury.io/
+.. |Version| image:: https://img.shields.io/pypi/v/setupext-janitor.svg?
+   :target: https://pypi.org/project/setupext-janitor/
 .. |Downloads| image:: https://img.shields.io/pypi/dm/setupext-janitor.svg
-   :target: https://pypi.python.org/pypi/setupext-janitor
+   :target: https://pypi.org/project/setupext-janitor/
 .. |Status| image:: https://travis-ci.org/dave-shawley/setupext-janitor.svg
    :target: https://travis-ci.org/dave-shawley/setupext-janitor
-.. |License| image:: https://img.shields.io/pypi/l/setupext-janitor.svg
-   :target: https://setupext-janitor.readthedocs.org/
+.. |License| image:: https://img.shields.io/github/license/dave-shawley/setupext-janitor.svg
+   :target: https://setupext-janitor.readthedocs.io/
