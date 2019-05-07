@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* Next Release
+* 1.1.0 (07-May-2019)
 
   - Drop support for Python 2.6, and 3.0-3.4
   - Move `version` and `version_info` from the `janitor` module into the
