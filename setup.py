@@ -14,7 +14,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
     platforms='any',
-    python_requires='==2.7.*,>=3.5',
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, != 3.4.*',
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
