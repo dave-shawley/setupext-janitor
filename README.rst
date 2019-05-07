@@ -28,13 +28,23 @@ environment.
 Installation
 ~~~~~~~~~~~~
 The ``setuptools`` package contains a number of interesting ways in which
-it can be extended.  If you develop Python packages, then you can include
-extension packages using the ``setup_requires`` and ``cmdclass`` keyword
-parameters to the ``setup`` function call.  This is a little more
-difficult than it should be since the ``setupext`` package needs to be
-imported into *setup.py* so that it can be passed as a keyword parameter
-**before** it is downloaded.  The easiest way to do this is to catch the
-``ImportError`` that happens if it is not already downloaded::
+it can be extended.  The simplest way to use this extension is to install
+it into the environment and use it.  The package extends the ``clean``
+command by installing a `distutils extension`_::
+
+   $ pip install -q 'setupext-janitor'
+   $ ./setup.py clean --dist --eggs
+   running clean
+   removing './my_package.egg-info' (and everything under it)
+   removing 'dist' (and everything under it)
+
+You can also install the command from within your *setup.py* using the
+``setup_requires`` and ``cmdclass`` keyword parameters to the ``setup``
+function call.  This is a little more difficult than it should be since
+the ``setupext_janitor`` package needs to be imported into *setup.py* so
+that it can be passed as a keyword parameter **before** it is downloaded.
+The easiest way to do this is to catch the ``ImportError`` that happens
+if it is not already downloaded::
 
    import setuptools
    try:
@@ -58,11 +68,10 @@ imported into *setup.py* so that it can be passed as a keyword parameter
          }
    )
 
-You can use a different approach if you are simply a developer that wants
-to have this functionality available for your own use, then you can install
-it into your working environment.  This package installs itself into the
-environment as a `distutils extension`_ so that it is available to any
-*setup.py* script as if by magic.
+This approach **is not recommended** since the ``install_requires`` keyword
+will install ``setupext_janitor`` into a target environment when installing
+your package from a source distribution.  Not to mention that amount of
+gynmastics required to safely use it from within *setup.py*,
 
 Usage
 ~~~~~
