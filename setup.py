@@ -38,6 +38,7 @@ setuptools.setup(
         'dev': [
             'coverage==4.5.3',
             'flake8==3.7.7',
+            'mock==1.0.1; python_version<"3"',
             'nose==1.3.7',
             'sphinx==1.8.5',
             'sphinx-rtd-theme==0.4.3',

@@ -1,4 +1,4 @@
-from distutils import core, dist
+from distutils import core, dist, log
 from distutils.command import clean
 import atexit
 import os.path
@@ -6,6 +6,10 @@ import shutil
 import tempfile
 import unittest
 import uuid
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 from setupext_janitor import janitor
 
@@ -42,6 +46,7 @@ def run_setup(*command_line):
             """Skip processing of configuration files."""
             pass
 
+    log.sys = mock.Mock()  # stop distutils from spewing output
     core.setup(
         distclass=FakeDistribution,
         script_name='testsetup.py',
@@ -67,7 +72,8 @@ class CommandOptionTests(unittest.TestCase):
             janitor.CleanCommand.user_options)
 
 
-class DirectoryCleanupMixin(object):
+class DirectoryCleanupMixin(unittest.TestCase):
+    temp_dir = None  # populated in setUpClass
 
     @classmethod
     def setUpClass(cls):
@@ -85,12 +91,14 @@ class DirectoryCleanupMixin(object):
             os.makedirs(d)
         return dirs[:]
 
-    def assert_path_does_not_exist(self, *trailing_segments):
+    @staticmethod
+    def assert_path_does_not_exist(*trailing_segments):
         full_path = os.path.join(*trailing_segments)
         if os.path.exists(full_path):
             raise AssertionError('{0} should not exist'.format(full_path))
 
-    def assert_path_exists(self, *trailing_segments):
+    @staticmethod
+    def assert_path_exists(*trailing_segments):
         full_path = os.path.join(*trailing_segments)
         if not os.path.exists(full_path):
             raise AssertionError('{0} should exist'.format(full_path))
@@ -225,7 +233,8 @@ class VirtualEnvironmentCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         os.rmdir(venv_dir)
         run_setup('clean', '--environment')
 
-    def test_that_janitor_does_not_fail_when_no_dir_specified(self):
+    @staticmethod
+    def test_that_janitor_does_not_fail_when_no_dir_specified():
         os.environ.pop('VIRTUAL_ENV', None)
         run_setup('clean', '--environment')
 
