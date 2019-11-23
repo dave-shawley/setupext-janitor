@@ -1,4 +1,4 @@
-from distutils import core, dist
+from distutils import core, dist, errors, log
 from distutils.command import clean
 import atexit
 import os.path
@@ -6,11 +6,17 @@ import shutil
 import tempfile
 import unittest
 import uuid
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
+import sphinx.setup_command
 
 from setupext_janitor import janitor
 
 
-def run_setup(*command_line):
+def run_setup(*command_line, **setup_kwargs):
     """
     Run the setup command with `command_line`.
 
@@ -42,11 +48,14 @@ def run_setup(*command_line):
             """Skip processing of configuration files."""
             pass
 
+    cmd_classes = setup_kwargs.pop('cmdclass', {})
+    cmd_classes['clean'] = janitor.CleanCommand
+    log.sys = mock.Mock()  # stop distutils from spewing output
     core.setup(
         distclass=FakeDistribution,
         script_name='testsetup.py',
         script_args=command_line,
-        cmdclass={'clean': janitor.CleanCommand},
+        cmdclass=cmd_classes,
     )
 
 
@@ -67,7 +76,8 @@ class CommandOptionTests(unittest.TestCase):
             janitor.CleanCommand.user_options)
 
 
-class DirectoryCleanupMixin(object):
+class DirectoryCleanupMixin(unittest.TestCase):
+    temp_dir = None  # populated in setUpClass
 
     @classmethod
     def setUpClass(cls):
@@ -85,12 +95,14 @@ class DirectoryCleanupMixin(object):
             os.makedirs(d)
         return dirs[:]
 
-    def assert_path_does_not_exist(self, *trailing_segments):
+    @staticmethod
+    def assert_path_does_not_exist(*trailing_segments):
         full_path = os.path.join(*trailing_segments)
         if os.path.exists(full_path):
             raise AssertionError('{0} should not exist'.format(full_path))
 
-    def assert_path_exists(self, *trailing_segments):
+    @staticmethod
+    def assert_path_exists(*trailing_segments):
         full_path = os.path.join(*trailing_segments)
         if not os.path.exists(full_path):
             raise AssertionError('{0} should exist'.format(full_path))
@@ -143,6 +155,28 @@ class DistDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
             'clean', '--dist', '--dry-run'
         )
         self.assert_path_exists(sdist_dir)
+
+    def test_that_dist_commands_without_dist_dir_are_ignored(self):
+        class CustomDistCommand(core.Command):
+            user_options = [('my-dir=', None, 'never seen')]
+
+            def initialize_options(self):
+                self.my_dir = None
+
+            def finalize_options(self):
+                if self.my_dir is None:
+                    self.my_dir = 'my-dir'
+
+            def run(self):
+                pass
+
+        my_dir = self.create_directory('my-dir')
+        run_setup(
+            'mydist', '--my-dir={0}'.format(my_dir),
+            'clean', '--dist',
+            cmdclass={'mydist': CustomDistCommand}
+        )
+        self.assertTrue(os.path.exists(my_dir))
 
 
 class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
@@ -225,7 +259,8 @@ class VirtualEnvironmentCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         os.rmdir(venv_dir)
         run_setup('clean', '--environment')
 
-    def test_that_janitor_does_not_fail_when_no_dir_specified(self):
+    @staticmethod
+    def test_that_janitor_does_not_fail_when_no_dir_specified():
         os.environ.pop('VIRTUAL_ENV', None)
         run_setup('clean', '--environment')
 
@@ -261,6 +296,35 @@ class PycacheCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         run_setup('clean', '--dist', '--pycache')
         for cache_dir in all_dirs:
             self.assert_path_does_not_exist(cache_dir)
+
+
+class BuildCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
+
+    def setUp(self):
+        super(BuildCleanupTests, self).setUp()
+        self.test_root = self.create_directory('test-root')
+        starting_dir = os.curdir
+        self.addCleanup(os.chdir, starting_dir)
+        os.chdir(self.test_root)
+
+    def test_that_build_directory_is_removed(self):
+        os.mkdir('build')
+        # the core clean action will remove the build directory if AND
+        # ONLY IF it is empty
+        with open(os.path.join('build', 'stamp'), 'w') as f:
+            f.write('need a file here')
+        self.assert_path_exists('build')
+        run_setup('clean', '--build')
+        self.assert_path_does_not_exist('build')
+
+    def test_that_sphinx_build_dirs_are_removed(self):
+        sphinx_build_dir = self.mkdirs('sphinx-build-dir')[0]
+        run_setup(
+            'build_sphinx', '--build-dir', sphinx_build_dir,
+            'clean', '--build',
+            cmdclass={'build_sphinx': sphinx.setup_command.BuildDoc},
+        )
+        self.assert_path_does_not_exist(sphinx_build_dir)
 
 
 class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):
@@ -308,3 +372,47 @@ class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):
 
     def test_that_envdir_is_removed(self):
         self.assert_path_does_not_exist(self.env_dir)
+
+
+class DistutilFinalizationErrorTests(unittest.TestCase):
+    @staticmethod
+    def test_for_issue_12_regression():
+        # This twisted test ensures that
+        # https://github.com/dave-shawley/setupext-janitor/issues/12
+        # does not re-occur.  The defect only occurs on non-posix
+        # based systems when we finalize the distribution related
+        # commands.
+        from distutils.command.bdist_rpm import os as target_module
+        with mock.patch.object(target_module, 'name', new='nt', create=True):
+            run_setup('clean', '--dist')
+
+    @staticmethod
+    def test_that_platform_errors_are_ignored_during_finalization():
+        # This similarly strange test verifies that platform errors
+        # raised from distribution commands during finalization are
+        # ignored.  These indicate that the command is not necessarily
+        # supported on the platform that we are running on.  It should
+        # be safe to ignore the errors raised when finalizing commands
+        # since we are simply trying to find distribution directory
+        # names.
+        class CustomDistribution(dist.Distribution):
+            def run_command(self, command):
+                if command == 'clean':
+                    dist.Distribution.run_command(self, command)
+
+            def get_command_obj(self, command, create=1):
+                cmd = dist.Distribution.get_command_obj(self, command, create=create)
+                if command == 'bdist_rpm':
+                    cmd.finalize_options = mock.Mock(
+                        side_effect=errors.DistutilsPlatformError)
+                return cmd
+
+            def parse_config_files(self, filenames=None):
+                pass
+
+        core.setup(
+            distclass=CustomDistribution,
+            script_name='testsetup.py',
+            script_args=['clean', '--dist'],
+            cmdclass={'clean': janitor.CleanCommand},
+        )
