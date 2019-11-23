@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* Next release
+* 1.1.2 (23-Nov-2019)
 
   - Add support for *--build* (`#17`_)
   - Clean up sphinx generated directories with *--build* (`#6`_)
