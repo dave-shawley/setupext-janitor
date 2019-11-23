@@ -5,6 +5,7 @@ Changelog
 
   - Add support for *--build* (`#17`_)
   - Clean up sphinx generated directories with *--build* (`#6`_)
+  - Add 3.8 into the test matrix.
 
 * 1.1.1 (07-May-2019)
 
