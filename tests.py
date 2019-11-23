@@ -11,6 +11,8 @@ try:
 except ImportError:
     import mock
 
+import sphinx.setup_command
+
 from setupext_janitor import janitor
 
 
@@ -314,6 +316,15 @@ class BuildCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
         self.assert_path_exists('build')
         run_setup('clean', '--build')
         self.assert_path_does_not_exist('build')
+
+    def test_that_sphinx_build_dirs_are_removed(self):
+        sphinx_build_dir = self.mkdirs('sphinx-build-dir')[0]
+        run_setup(
+            'build_sphinx', '--build-dir', sphinx_build_dir,
+            'clean', '--build',
+            cmdclass={'build_sphinx': sphinx.setup_command.BuildDoc},
+        )
+        self.assert_path_does_not_exist(sphinx_build_dir)
 
 
 class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):

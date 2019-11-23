@@ -76,7 +76,8 @@ class CleanCommand(_CleanCommand):
             dir_names.update(_gather_attributes(
                 self.distribution,
                 lambda cmd_name: cmd_name.startswith('build'),
-                'build_base', 'build_clib', 'build_lib', 'build_temp'))
+                'build_base', 'build_clib', 'build_dir', 'build_lib',
+                'build_temp'))
 
         if self.dist:
             dir_names.update(_gather_attributes(

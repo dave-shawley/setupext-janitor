@@ -4,6 +4,7 @@ Changelog
 * Next release
 
   - Add support for *--build* (`#17`_)
+  - Clean up sphinx generated directories with *--build* (`#6`_)
 
 * 1.1.1 (07-May-2019)
 
@@ -29,4 +30,5 @@ Changelog
   - Support removal of distribution directories.
 
 
+.. _#6: https://github.com/dave-shawley/setupext-janitor/issues/6
 .. _#17: https://github.com/dave-shawley/setupext-janitor/issues/17
