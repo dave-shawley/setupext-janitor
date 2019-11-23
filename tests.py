@@ -354,3 +354,34 @@ class DistutilFinalizationErrorTests(unittest.TestCase):
         from distutils.command.bdist_rpm import os as target_module
         with mock.patch.object(target_module, 'name', new='nt', create=True):
             run_setup('clean', '--dist')
+
+    @staticmethod
+    def test_that_platform_errors_are_ignored_during_finalization():
+        # This similarly strange test verifies that platform errors
+        # raised from distribution commands during finalization are
+        # ignored.  These indicate that the command is not necessarily
+        # supported on the platform that we are running on.  It should
+        # be safe to ignore the errors raised when finalizing commands
+        # since we are simply trying to find distribution directory
+        # names.
+        class CustomDistribution(dist.Distribution):
+            def run_command(self, command):
+                if command == 'clean':
+                    dist.Distribution.run_command(self, command)
+
+            def get_command_obj(self, command, create=1):
+                cmd = dist.Distribution.get_command_obj(self, command, create=create)
+                if command == 'bdist_rpm':
+                    cmd.finalize_options = mock.Mock(
+                        side_effect=errors.DistutilsPlatformError)
+                return cmd
+
+            def parse_config_files(self, filenames=None):
+                pass
+
+        core.setup(
+            distclass=CustomDistribution,
+            script_name='testsetup.py',
+            script_args=['clean', '--dist'],
+            cmdclass={'clean': janitor.CleanCommand},
+        )

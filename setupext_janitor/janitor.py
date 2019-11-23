@@ -1,7 +1,6 @@
-from distutils import dir_util, errors
+from distutils import dir_util, errors, log
 from distutils.command.clean import clean as _CleanCommand
 import os.path
-import traceback
 
 import setupext_janitor
 
@@ -73,30 +72,23 @@ class CleanCommand(_CleanCommand):
 
         dir_names = set()
         if self.dist:
+            # If we are cleaning up distributions, then capture `dist_dir`
+            # attributes for any command that looks like a distribution
+            # command.  This is science, but it does work.  I decided to
+            # ignore platform errors during command finalization since they
+            # indicate that the particular distribution style is not
+            # supported on the platform.  See
+            # https://github.com/dave-shawley/setupext-janitor/issues/12
+            # for the initial defect discussion.
             for cmd_name, _ in self.distribution.get_command_list():
                 if 'dist' in cmd_name:
                     command = self.distribution.get_command_obj(cmd_name)
-                    # Stop premature exit for RPM-on-NT err
-                    # https://github.com/dave-shawley/setupext-janitor/issues/12
-                    # command.ensure_finalized()
                     try:
                         command.ensure_finalized()
-                    except Exception as err:
-                        skip = ("don't know how to create RPM distributions "
-                                "on platform nt")
-                        if skip in err.args:
-                            print('-' * 50,
-                                  '\nException encountered and ignored:')
-                            print('{} {}'.format(err.__class__.__name__,
-                                                 err.args[0]))
-                            if debug:
-                                traceback.print_exc()
-                            print('-'*50)
-                        else:
-                            raise err
-
-                    if getattr(command, 'dist_dir', None):
-                        dir_names.add(command.dist_dir)
+                        if getattr(command, 'dist_dir', None):
+                            dir_names.add(command.dist_dir)
+                    except errors.DistutilsPlatformError as err:
+                        log.warn('ignoring error from %s: %s', cmd_name, err)
 
         if self.eggs:
             for name in os.listdir(self.egg_base):
