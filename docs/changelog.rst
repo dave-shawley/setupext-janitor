@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* Next release
+
+  - Add support for *--build* (`#17`_)
+
 * 1.1.1 (07-May-2019)
 
   - Fix ``Requires-Python`` metadata.
@@ -23,3 +27,6 @@ Changelog
   - Support removal of .egg-info and .egg directories.
   - Add support for *--dry-run*
   - Support removal of distribution directories.
+
+
+.. _#17: https://github.com/dave-shawley/setupext-janitor/issues/17

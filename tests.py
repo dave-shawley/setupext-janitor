@@ -296,6 +296,26 @@ class PycacheCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
             self.assert_path_does_not_exist(cache_dir)
 
 
+class BuildCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
+
+    def setUp(self):
+        super(BuildCleanupTests, self).setUp()
+        self.test_root = self.create_directory('test-root')
+        starting_dir = os.curdir
+        self.addCleanup(os.chdir, starting_dir)
+        os.chdir(self.test_root)
+
+    def test_that_build_directory_is_removed(self):
+        os.mkdir('build')
+        # the core clean action will remove the build directory if AND
+        # ONLY IF it is empty
+        with open(os.path.join('build', 'stamp'), 'w') as f:
+            f.write('need a file here')
+        self.assert_path_exists('build')
+        run_setup('clean', '--build')
+        self.assert_path_does_not_exist('build')
+
+
 class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):
 
     @classmethod

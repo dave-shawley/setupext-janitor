@@ -78,6 +78,9 @@ Usage
 Once the extension is installed, the ``clean`` command will accept a
 few new command line parameters.
 
+``setup.py clean --build``
+   Removes directories that various *build* commands produce.
+
 ``setup.py clean --dist``
    Removes directories that the various *dist* commands produce.
 

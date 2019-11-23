@@ -42,6 +42,7 @@ class CleanCommand(_CleanCommand):
 
     def initialize_options(self):
         _CleanCommand.initialize_options(self)
+        self.build = False
         self.dist = False
         self.eggs = False
         self.egg_base = None
@@ -71,24 +72,16 @@ class CleanCommand(_CleanCommand):
         _CleanCommand.run(self)
 
         dir_names = set()
+        if self.build:
+            dir_names.update(_gather_attributes(
+                self.distribution,
+                lambda cmd_name: cmd_name.startswith('build'),
+                'build_base', 'build_clib', 'build_lib', 'build_temp'))
+
         if self.dist:
-            # If we are cleaning up distributions, then capture `dist_dir`
-            # attributes for any command that looks like a distribution
-            # command.  This is science, but it does work.  I decided to
-            # ignore platform errors during command finalization since they
-            # indicate that the particular distribution style is not
-            # supported on the platform.  See
-            # https://github.com/dave-shawley/setupext-janitor/issues/12
-            # for the initial defect discussion.
-            for cmd_name, _ in self.distribution.get_command_list():
-                if 'dist' in cmd_name:
-                    command = self.distribution.get_command_obj(cmd_name)
-                    try:
-                        command.ensure_finalized()
-                        if getattr(command, 'dist_dir', None):
-                            dir_names.add(command.dist_dir)
-                    except errors.DistutilsPlatformError as err:
-                        log.warn('ignoring error from %s: %s', cmd_name, err)
+            dir_names.update(_gather_attributes(
+                self.distribution, lambda cmd_name: 'dist' in cmd_name,
+                'dist_dir'))
 
         if self.eggs:
             for name in os.listdir(self.egg_base):
@@ -115,6 +108,43 @@ class CleanCommand(_CleanCommand):
                     'skipping {0} since it does not exist'.format(dir_name))
 
 
+def _gather_attributes(dist, selector, *attributes):
+    """Gather arbitrary attributes from a select set of commands.
+
+    :param distutils.dist.Distribution dist: distribution to process
+    :param selector: callable that selects which commands to process
+        by name.  selector(str) -> bool.
+    :param attributes: list of attribute names to gather
+    :rtype: set[str]
+
+    This function iterates over the commands available in `dist`,
+    ensures that the are finalized, and returns the values of the
+    attributes listed in `attributes`.  It only processes commands
+    that are selected by `selector` which is a callable that takes
+    a command name and returns :data:`True` or :data:`False`.
+
+    """
+    dir_names = set()
+    for cmd_name, _ in dist.get_command_list():
+        if selector(cmd_name):
+            command = dist.get_command_obj(cmd_name)
+            try:
+                command.ensure_finalized()
+                for name in attributes:
+                    dir_name = getattr(command, name, None)
+                    if dir_name:
+                        dir_names.add(dir_name)
+            except errors.DistutilsPlatformError as err:
+                # This isn't science, but it seems to work.  I decided to
+                # ignore platform errors during command finalization since
+                # they indicate that the particular command is not supported
+                # on the current platform.  See
+                # https://github.com/dave-shawley/setupext-janitor/issues/12
+                # for the initial defect discussion.
+                log.warn('ignoring error from %s: %s', cmd_name, err)
+    return dir_names
+
+
 def _set_options():
     """
     Set the options for CleanCommand.
@@ -133,6 +163,7 @@ def _set_options():
     """
     CleanCommand.user_options = _CleanCommand.user_options[:]
     CleanCommand.user_options.extend([
+        ('build', 'b', 'remove build directory'),
         ('dist', 'd', 'remove distribution directory'),
         ('eggs', None, 'remove egg and egg-info directories'),
         ('environment', 'E', 'remove virtual environment directory'),
