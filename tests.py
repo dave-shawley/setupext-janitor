@@ -1,4 +1,4 @@
-from distutils import core, dist, log
+from distutils import core, dist, errors, log
 from distutils.command import clean
 import atexit
 import os.path
@@ -14,7 +14,7 @@ except ImportError:
 from setupext_janitor import janitor
 
 
-def run_setup(*command_line):
+def run_setup(*command_line, **setup_kwargs):
     """
     Run the setup command with `command_line`.
 
@@ -46,12 +46,14 @@ def run_setup(*command_line):
             """Skip processing of configuration files."""
             pass
 
+    cmd_classes = setup_kwargs.pop('cmdclass', {})
+    cmd_classes['clean'] = janitor.CleanCommand
     log.sys = mock.Mock()  # stop distutils from spewing output
     core.setup(
         distclass=FakeDistribution,
         script_name='testsetup.py',
         script_args=command_line,
-        cmdclass={'clean': janitor.CleanCommand},
+        cmdclass=cmd_classes,
     )
 
 
@@ -151,6 +153,28 @@ class DistDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
             'clean', '--dist', '--dry-run'
         )
         self.assert_path_exists(sdist_dir)
+
+    def test_that_dist_commands_without_dist_dir_are_ignored(self):
+        class CustomDistCommand(core.Command):
+            user_options = [('my-dir=', None, 'never seen')]
+
+            def initialize_options(self):
+                self.my_dir = None
+
+            def finalize_options(self):
+                if self.my_dir is None:
+                    self.my_dir = 'my-dir'
+
+            def run(self):
+                pass
+
+        my_dir = self.create_directory('my-dir')
+        run_setup(
+            'mydist', '--my-dir={0}'.format(my_dir),
+            'clean', '--dist',
+            cmdclass={'mydist': CustomDistCommand}
+        )
+        self.assertTrue(os.path.exists(my_dir))
 
 
 class EggDirectoryCleanupTests(DirectoryCleanupMixin, unittest.TestCase):
@@ -317,3 +341,16 @@ class RemoveAllTests(DirectoryCleanupMixin, unittest.TestCase):
 
     def test_that_envdir_is_removed(self):
         self.assert_path_does_not_exist(self.env_dir)
+
+
+class DistutilFinalizationErrorTests(unittest.TestCase):
+    @staticmethod
+    def test_for_issue_12_regression():
+        # This twisted test ensures that
+        # https://github.com/dave-shawley/setupext-janitor/issues/12
+        # does not re-occur.  The defect only occurs on non-posix
+        # based systems when we finalize the distribution related
+        # commands.
+        from distutils.command.bdist_rpm import os as target_module
+        with mock.patch.object(target_module, 'name', new='nt', create=True):
+            run_setup('clean', '--dist')
